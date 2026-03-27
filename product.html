@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMX - Produits</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+margin:0;
+background:#f5f6fa;
+font-family:Arial;
+color:#111;
+}
+
+/* SLIDER */
+.slider{
+width:92%;
+height:180px;
+margin:15px auto;
+border-radius:20px;
+overflow:hidden;
+position:relative;
+}
+
+.slide{
+width:100%;
+height:100%;
+position:absolute;
+background-size:cover;
+background-position:center;
+transition:0.5s;
+}
+
+.flash{
+position:absolute;
+width:100%;
+height:100%;
+background:#fff;
+opacity:0;
+}
+
+/* TITLE */
+.title{
+padding:10px 15px;
+font-weight:bold;
+color:#d4a017;
+font-size:18px;
+}
+
+/* STATS */
+.stats{
+display:flex;
+gap:10px;
+padding:0 10px;
+}
+
+.box{
+flex:1;
+background:#fff;
+border-radius:15px;
+padding:15px;
+box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+.box h3{
+margin:5px 0 0;
+}
+
+/* VIP CARD */
+.vip{
+margin:10px;
+background:#fff;
+border-radius:20px;
+display:flex;
+overflow:hidden;
+box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+.vip img{
+width:110px;
+height:100%;
+object-fit:cover;
+}
+
+.vip-content{
+padding:10px;
+flex:1;
+font-size:14px;
+}
+
+.vip-content h4{
+margin:0;
+color:#d4a017;
+}
+
+.buy{
+margin-top:8px;
+padding:8px 15px;
+background:#3b82f6;
+color:#fff;
+border:none;
+border-radius:20px;
+cursor:pointer;
+}
+
+/* NOTIFICATION */
+.popup-success{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+width:90%;
+max-width:350px;
+z-index:9999;
+opacity:0;
+transition:0.4s;
+}
+
+.popup-success.show{
+opacity:1;
+}
+
+.popup-card{
+background:#fff;
+border-radius:16px;
+padding:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.15);
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.icon{
+width:45px;
+height:45px;
+background:#16a34a;
+color:#fff;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+}
+
+.popup-text h3{
+margin:0;
+font-size:15px;
+}
+
+.popup-text p{
+margin:2px 0 0;
+font-size:13px;
+color:#555;
+}
+
+/* MENU */
+.menu{
+position:fixed;
+bottom:0;
+width:100%;
+background:#fff;
+display:flex;
+justify-content:space-around;
+border-top:1px solid #ddd;
+padding:8px 0;
+}
+
+.menu div{
+text-align:center;
+font-size:12px;
+color:#888;
+}
+
+.menu .active{
+color:#3b82f6;
+}
+
+/* SUPPORT */
+.support{
+position:fixed;
+right:15px;
+bottom:80px;
+width:60px;
+height:60px;
+background:#3b82f6;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#fff;
+font-size:25px;
+cursor:pointer;
+}
+
+.popup-support{
+position:fixed;
+right:15px;
+bottom:150px;
+background:#fff;
+padding:10px;
+border-radius:10px;
+display:none;
+}
+
+.popup-support div{
+padding:8px;
+background:#eee;
+margin-top:5px;
+border-radius:8px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="slider">
+<div class="flash" id="flash"></div>
+<div class="slide" id="slide1" style="background-image:url('BMX1.png')"></div>
+<div class="slide" id="slide2" style="background-image:url('BMX2.png');opacity:0"></div>
+</div>
+
+<div class="title">Tous les produits</div>
+
+<div class="stats">
+<div class="box">
+📦 Mes produits
+<h3 id="count">0</h3>
+</div>
+<div class="box">
+📈 Revenu total
+<h3 id="total">0 FCFA</h3>
+</div>
+</div>
+
+<div id="vipList"></div>
+
+<!-- NOTIFICATION -->
+<div class="popup-success" id="popup">
+<div class="popup-card">
+<div class="icon">✓</div>
+<div class="popup-text">
+<h3>Succès</h3>
+<p>Opération réussie</p>
+</div>
+</div>
+</div>
+
+<div class="support" onclick="toggleSupport()">🎧</div>
+
+<div class="popup-support" id="supportBox">
+<div onclick="openLink('http://t.me/Melissajoan1')">💬 Ligne 1</div>
+<div onclick="openLink('https://t.me/GAININVEST2')">💬 Ligne 2</div>
+</div>
+
+<div class="menu">
+<div onclick="location.href='home.html'">🏠<br>Accueil</div>
+<div class="active">📦<br>Produit</div>
+<div onclick="location.href='team.html'">👥<br>Équipe</div>
+<div onclick="location.href='account.html'">👤<br>Compte</div>
+</div>
+
+<script>
+const client = supabase.createClient(
+"https://mqairgmhekusgkwhjiri.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xYWlyZ21oZWt1c2drd2hqaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxNjcsImV4cCI6MjA4OTkyNDE2N30.AGdkQxYxTKiK0p5DloOYdi8mTRZk23TgAEweBVS9bwM"
+);
+
+/* NOTIFICATION PRO */
+function showNotification(title,message,type="success"){
+const popup=document.getElementById("popup");
+popup.querySelector("h3").innerText=title;
+popup.querySelector("p").innerText=message;
+
+const icon=popup.querySelector(".icon");
+
+if(type==="error"){
+icon.style.background="#dc2626";
+icon.innerText="✖";
+}else{
+icon.style.background="#16a34a";
+icon.innerText="✓";
+}
+
+popup.classList.add("show");
+
+setTimeout(()=>popup.classList.remove("show"),3000);
+}
+
+/* USER */
+async function check(){
+const {data}=await client.auth.getUser();
+if(!data.user){
+location.href="login.html";
+}else{
+loadVIP();
+loadStats();
+}
+}
+check();
+
+/* LOAD VIP COMPLET */
+async function loadVIP(){
+
+const {data,error}=await client
+.from("vip_plans")
+.select("*")
+.eq("is_active",true)
+.order("price",{ascending:true});
+
+if(error){
+showNotification("Erreur","Chargement impossible","error");
+return;
+}
+
+let html="";
+
+data.forEach(v=>{
+html+=`
+<div class="vip">
+<img src="BMX.png">
+<div class="vip-content">
+
+<h4>${v.name}</h4>
+
+Produit d'investissement<br><br>
+
+💰 Prix: <b>${v.price} FCFA</b><br>
+📈 Revenu quotidien: ${v.daily_income} FCFA<br>
+💎 Total: ${v.total_income} FCFA<br>
+⏳ Durée: ${v.duration} jours<br>
+
+<button class="buy"
+onclick="buyVIP('${v.id}',${v.price},${v.daily_income},${v.total_income},${v.duration})">
+Activer VIP
+</button>
+
+</div>
+</div>
+`;
+});
+
+vipList.innerHTML = html;
+}
+
+/* ACHAT VIP */
+async function buyVIP(vip_id,price,daily,total,duration){
+
+const {data:{user}}=await client.auth.getUser();
+
+const {data:userData}=await client
+.from("users")
+.select("*")
+.eq("id",user.id)
+.single();
+
+if(userData.solde < price){
+showNotification("Erreur","Solde insuffisant ❌","error");
+return;
+}
+
+await client
+.from("users")
+.update({solde:userData.solde-price})
+.eq("id",user.id);
+
+const {error}=await client
+.from("user_vips")
+.insert({
+id: crypto.randomUUID(),
+user_id:user.id,
+vip_id:vip_id,
+order_id: crypto.randomUUID(),
+montant:price,
+daily_income:daily,
+total_income:total,
+date_debut:new Date(),
+date_fin:new Date(Date.now()+duration*86400000),
+statut:"ACTIF"
+});
+
+if(error){
+showNotification("Erreur","Achat VIP échoué ❌","error");
+return;
+}
+
+showNotification("Succès","VIP activé avec succès 🎉","success");
+
+loadStats();
+}
+
+/* STATS */
+async function loadStats(){
+
+const {data:{user}}=await client.auth.getUser();
+
+const {data:vips}=await client
+.from("user_vips")
+.select("*")
+.eq("user_id",user.id);
+
+count.innerText=vips.length;
+
+let totalGain=0;
+vips.forEach(v=>totalGain+=v.total_income||0);
+
+total.innerText=totalGain+" FCFA";
+}
+
+/* SUPPORT */
+function toggleSupport(){
+supportBox.style.display =
+supportBox.style.display==="block"?"none":"block";
+}
+
+function openLink(url){
+window.open(url);
+}
+
+/* SLIDER */
+let i=0;
+setInterval(()=>{
+flash.style.opacity=0.8;
+
+setTimeout(()=>{
+flash.style.opacity=0;
+
+if(i===0){
+slide1.style.opacity=0;
+slide2.style.opacity=1;
+i=1;
+}else{
+slide1.style.opacity=1;
+slide2.style.opacity=0;
+i=0;
+}
+
+},200);
+},4000);
+</script>
+
+</body>
+</html>

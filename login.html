@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMX - Connexion</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+margin:0;
+background:#000;
+color:#fff;
+font-family:Arial;
+display:flex;
+flex-direction:column;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+.container{
+flex:1;
+display:flex;
+flex-direction:column;
+justify-content:center;
+padding:20px;
+max-width:400px;
+margin:auto;
+width:100%;
+}
+
+.logo{text-align:center;margin-bottom:20px;}
+.logo h1{color:#ffb300;margin:0;}
+.logo p{color:#aaa;font-size:14px;}
+
+input{
+width:100%;
+padding:14px;
+margin-top:10px;
+background:#222;
+border:none;
+border-radius:10px;
+color:#fff;
+}
+
+.box{position:relative;}
+.eye{
+position:absolute;
+right:10px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+}
+
+button{
+width:100%;
+padding:14px;
+margin-top:20px;
+background:#ffb300;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.error{
+color:red;
+font-size:13px;
+text-align:center;
+margin-top:10px;
+}
+
+.link{text-align:center;margin-top:10px;}
+.link a{color:#ffb300;text-decoration:none;}
+
+.info{
+margin-top:40px;
+font-size:14px;
+color:#aaa;
+text-align:center;
+line-height:1.8;
+}
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#666;
+padding:15px;
+}
+
+/* POPUP */
+.popup{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.popup-box{
+background:#111;
+padding:25px;
+border-radius:12px;
+text-align:center;
+width:90%;
+max-width:300px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+<h1>BMX</h1>
+<p>Investissez dans l'avenir, récoltez aujourd'hui.</p>
+</div>
+
+<input id="email" placeholder="Email">
+
+<div class="box">
+<input type="password" id="password" placeholder="Mot de passe">
+<span class="eye" onclick="togglePass()">👁</span>
+</div>
+
+<button id="btn" onclick="login()">Se connecter</button>
+
+<div class="link">
+Pas de compte ?
+<a href="#" onclick="goRegister(event)">S'inscrire</a>
+</div>
+
+<div class="error" id="msg"></div>
+
+<div class="info">
+🔐 Connectez-vous à votre compte<br>
+📊 Suivez vos investissements<br>
+💰 Récupérez vos commissions<br>
+📈 Suivez vos gains<br>
+🏦 Retirez vos bonus
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 BMX Invest — Plateforme sécurisée 🚀
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+<div class="popup-box">
+<h2 style="color:#ffb300;">✅ Connexion réussie</h2>
+<p>Content de vous revoir 👋</p>
+<p>📊 Suivez vos investissements et progression</p>
+
+<button onclick="goHome()">Continuer</button>
+</div>
+</div>
+
+<script>
+
+const { createClient } = supabase;
+
+const client = createClient(
+"https://mqairgmhekusgkwhjiri.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xYWlyZ21oZWt1c2drd2hqaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxNjcsImV4cCI6MjA4OTkyNDE2N30.AGdkQxYxTKiK0p5DloOYdi8mTRZk23TgAEweBVS9bwM"
+);
+
+// 👁
+function togglePass(){
+let input = document.getElementById("password");
+input.type = input.type === "password" ? "text" : "password";
+}
+
+// 🔥 NAVIGATION ULTRA STABLE
+function goRegister(e){
+e.preventDefault();
+window.location.assign("index.html");
+}
+
+// 🚀 LOGIN
+async function login(){
+
+let email = document.getElementById("email").value;
+let password = document.getElementById("password").value;
+let msg = document.getElementById("msg");
+let btn = document.getElementById("btn");
+
+msg.innerText = "";
+
+if(!email || !password){
+msg.innerText = "Veuillez remplir tous les champs";
+return;
+}
+
+btn.disabled = true;
+btn.innerText = "Connexion en cours...";
+
+const { error } = await client.auth.signInWithPassword({
+email: email,
+password: password
+});
+
+if(error){
+msg.innerText = "Email ou mot de passe incorrect";
+btn.disabled = false;
+btn.innerText = "Se connecter";
+return;
+}
+
+// popup
+document.getElementById("popup").style.display = "flex";
+
+}
+
+// 🔥 NAVIGATION HOME ULTRA STABLE
+function goHome(){
+window.location.assign("home.html");
+}
+
+</script>
+
+</body>
+</html>
