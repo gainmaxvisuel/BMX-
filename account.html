@@ -1,0 +1,123 @@
+<!DOCTYPE html>  <html lang="fr">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Compte</title>  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>  <style>  
+  
+body{  
+  margin:0;  
+  font-family:Arial;  
+  background:#f5f6fa;  
+  padding-bottom:90px;  
+}  
+  
+/* CARTE */  
+.card{  
+  background:linear-gradient(135deg,#3b82f6,#1e40af);  
+  color:#fff;  
+  margin:15px;  
+  padding:25px;  
+  border-radius:20px;  
+}  
+  
+.big{  
+  font-size:28px;  
+  font-weight:bold;  
+}  
+  
+/* ACTIONS */  
+.actions{  
+  display:flex;  
+  gap:10px;  
+  margin:15px;  
+}  
+  
+.btn{  
+  flex:1;  
+  background:#fff;  
+  padding:15px;  
+  border-radius:12px;  
+  text-align:center;  
+  font-weight:bold;  
+}  
+  
+/* MENU */  
+.menu{  
+  position:fixed;  
+  bottom:0;  
+  width:100%;  
+  background:#fff;  
+  display:flex;  
+  justify-content:space-around;  
+  padding:12px 0;  
+  border-top:1px solid #ddd;  
+}  
+  
+.menu-item{  
+  text-align:center;  
+  font-size:13px;  
+}  
+  
+</style>  </head>  <body>  <!-- CARTE -->  <div class="card">    <div>ID Utilisateur</div>  
+  <div id="user_code" class="big">...</div>    <div style="margin-top:10px;">Solde</div>  
+  <div id="solde" class="big">0 FCFA</div>  </div>  <!-- BOUTONS -->  <div class="actions">    <div class="btn" onclick="go('deposit.html')">💰 Dépôt</div>  
+  <div class="btn" onclick="go('withdraw.html')">💸 Retrait</div>  
+  <div class="btn" onclick="go('transactions.html')">📊 Transactions</div>  </div>  <div class="actions">  
+  <div class="btn" onclick="go('products.html')">📦 Mes produits</div>  
+</div>  <div class="actions">  
+  <div class="btn" onclick="go('https://t.me/gaininvestissemen')">📢 Canal Telegram</div>  
+  <div class="btn" onclick="go('https://t.me/+0n6zXaKTv2ZlZTVk')">💬 Groupe</div>  
+</div>  <!-- MENU -->  <div class="menu">    <div class="menu-item" onclick="go('home.html')">🏠 Accueil</div>  
+  <div class="menu-item" onclick="go('products.html')">📦 Produit</div>  
+  <div class="menu-item" onclick="go('team.html')">👥 Équipe</div>  
+  <div class="menu-item" onclick="logout()">🚪 Déconnexion</div>  </div>  <script>  
+  
+const supabase = window.supabase.createClient(  
+  "https://mqairgmhekusgkwhjiri.supabase.co",  
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xYWlyZ21oZWt1c2drd2hqaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxNjcsImV4cCI6MjA4OTkyNDE2N30.AGdkQxYxTKiK0p5DloOYdi8mTRZk23TgAEweBVS9bwM"  
+);  
+  
+/* CHARGEMENT USER */  
+async function loadUser(){  
+  
+  const { data: { user } } = await supabase.auth.getUser();  
+  
+  if(!user){  
+    location.href = "index.html";  
+    return;  
+  }  
+  
+  const { data } = await supabase  
+    .from("users")  
+    .select("*")  
+    .eq("id", user.id)  
+    .single();  
+  
+  if(!data){  
+    alert("Utilisateur introuvable");  
+    return;  
+  }  
+  
+  // ✅ ICI ON AFFICHE LE USER_CODE  
+  document.getElementById("user_code").innerText = data.user_code;  
+  
+  // ✅ SOLDE  
+  document.getElementById("solde").innerText = data.solde + " FCFA";  
+}  
+  
+/* NAVIGATION */  
+function go(page){  
+  location.href = page;  
+}  
+  
+/* DECONNEXION */  
+async function logout(){  
+  await supabase.auth.signOut();  
+  location.href = "index.html";  
+}  
+  
+/* INIT */  
+loadUser();  
+  
+</script>  </body>  
+</html>  Maintenant ça c'est la page COMPTE
