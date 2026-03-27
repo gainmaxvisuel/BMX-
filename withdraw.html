@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrait</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+margin:0;
+background:#000;
+color:#fff;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+/* container */
+.container{
+width:90%;
+max-width:400px;
+}
+
+/* retour */
+.back{
+position:absolute;
+top:20px;
+left:20px;
+font-size:24px;
+cursor:pointer;
+color:#ffb300;
+}
+
+/* titre */
+h2{
+text-align:center;
+color:#ffb300;
+}
+
+/* inputs */
+input, select{
+width:100%;
+padding:14px;
+margin-top:10px;
+background:#222;
+border:none;
+border-radius:10px;
+color:#fff;
+}
+
+/* bouton */
+button{
+width:100%;
+padding:14px;
+margin-top:20px;
+background:#ffb300;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+color:#000;
+}
+
+/* message */
+.msg{
+text-align:center;
+margin-top:10px;
+font-size:14px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="back" onclick="goHome()">←</div>
+
+<div class="container">
+
+<h2>Retrait</h2>
+
+<input id="name" placeholder="Nom complet">
+
+<select id="country" onchange="setCode()">
+<option value="">Choisir pays</option>
+<option value="+226">Burkina Faso (+226)</option>
+<option value="+223">Mali (+223)</option>
+<option value="+227">Niger (+227)</option>
+<option value="+229">Bénin (+229)</option>
+<option value="+228">Togo (+228)</option>
+<option value="+221">Sénégal (+221)</option>
+<option value="+225">Côte d'Ivoire (+225)</option>
+</select>
+
+<input id="phone" placeholder="Numéro">
+
+<input id="montant" placeholder="Montant">
+
+<select id="operator">
+<option value="">Choisir opérateur</option>
+<option>Orange Money</option>
+<option>Moov Money</option>
+<option>MTN</option>
+<option>Wave</option>
+<option>TMONEY</option>
+</select>
+
+<button onclick="submitWithdrawal()">Valider</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"https://mqairgmhekusgkwhjiri.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xYWlyZ21oZWt1c2drd2hqaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxNjcsImV4cCI6MjA4OTkyNDE2N30.AGdkQxYxTKiK0p5DloOYdi8mTRZk23TgAEweBVS9bwM"
+);
+
+let codePays = "";
+
+function setCode(){
+codePays = document.getElementById("country").value;
+}
+
+function goHome(){
+window.location.href = "home.html";
+}
+
+async function submitWithdrawal(){
+
+let name = document.getElementById("name").value;
+let phone = document.getElementById("phone").value;
+let montant = document.getElementById("montant").value;
+let operator = document.getElementById("operator").value;
+let msg = document.getElementById("msg");
+
+msg.innerText = "";
+
+---
+
+# 1️⃣ Vérification champs
+
+if(!name || !phone || !montant || !operator || !codePays){
+msg.innerText = "Veuillez remplir tous les champs";
+return;
+}
+
+---
+
+# 2️⃣ Minimum retrait
+
+if(Number(montant) < 1000){
+msg.innerText = "Le montant minimum est de 1000";
+return;
+}
+
+---
+
+# 3️⃣ Utilisateur connecté
+
+const { data: { user } } = await supabase.auth.getUser();
+
+if(!user){
+msg.innerText = "Utilisateur non connecté";
+return;
+}
+
+let fullPhone = codePays + phone;
+
+---
+
+# 4️⃣ Appel fonction SQL
+
+const { error } = await supabase.rpc("create_withdrawal", {
+p_user_id: user.id,
+p_montant: Number(montant),
+p_operator: operator,
+p_numero: fullPhone,
+p_nom: name
+});
+
+---
+
+# 5️⃣ Gestion erreur
+
+if(error){
+msg.innerText = "Erreur : " + error.message;
+return;
+}
+
+---
+
+# 6️⃣ Succès + redirection
+
+msg.innerText = "Retrait envoyé avec succès ✅";
+
+setTimeout(()=>{
+window.location.href = "home.html";
+},2000);
+
+}
+
+</script>
+
+</body>
+</html>
